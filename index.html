@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Sistem Pembagian Kelas Berdasarkan Nilai</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #eef2f5;
+    padding: 30px;
+}
+
+.container {
+    max-width: 900px;
+    background: white;
+    padding: 20px;
+    margin: auto;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h2, h3 {
+    text-align: center;
+}
+
+input, button {
+    padding: 8px;
+    margin: 6px 0;
+}
+
+.full {
+    width: 100%;
+}
+
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+.data-box {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.kelas {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+table, th, td {
+    border: 1px solid #333;
+}
+
+th, td {
+    padding: 8px;
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Sistem Pembagian Kelas Berdasarkan Nilai</h2>
+
+    <label>Jumlah Pendaftar</label>
+    <input type="number" id="pendaftar" class="full">
+
+    <label>Jumlah Kelas</label>
+    <input type="number" id="kelas" class="full">
+
+    <button class="full" onclick="buatForm()">Buat Form Nama & Nilai</button>
+
+    <div id="formData"></div>
+
+    <button class="full" onclick="proses()">Proses</button>
+
+    <div id="hasil"></div>
+
+    <h3>Distribusi Frekuensi Nilai</h3>
+    <div id="frekuensi"></div>
+</div>
+
+<script>
+function buatForm() {
+    let jumlah = document.getElementById("pendaftar").value;
+    let html = "<label>Data Pendaftar (Nama & Nilai)</label>";
+    html += "<div class='data-box'>";
+
+    for (let i = 0; i < jumlah; i++) {
+        html += `<input type="text" class="nama" placeholder="Nama">`;
+        html += `<input type="number" class="nilai" placeholder="Nilai">`;
+    }
+
+    html += "</div>";
+    document.getElementById("formData").innerHTML = html;
+}
+
+function proses() {
+    let jumlahPendaftar = parseInt(document.getElementById("pendaftar").value);
+    let jumlahKelas = parseInt(document.getElementById("kelas").value);
+    let kapasitas = Math.floor(jumlahPendaftar / jumlahKelas);
+
+    let namaInput = document.querySelectorAll(".nama");
+    let nilaiInput = document.querySelectorAll(".nilai");
+
+    let data = [];
+
+    for (let i = 0; i < namaInput.length; i++) {
+        data.push({
+            nama: namaInput[i].value,
+            nilai: parseInt(nilaiInput[i].value)
+        });
+    }
+
+    // Sorting nilai tertinggi ke terendah
+    data.sort((a, b) => b.nilai - a.nilai);
+
+    let index = 0;
+    let output = "<h3>Hasil Pembagian Kelas</h3>";
+
+    for (let k = 0; k < jumlahKelas; k++) {
+        output += `<div class="kelas"><b>Kelas ${String.fromCharCode(65 + k)}</b><br>`;
+        for (let j = 0; j < kapasitas; j++) {
+            if (index < data.length) {
+                output += `${data[index].nama} – ${data[index].nilai}<br>`;
+                index++;
+            }
+        }
+        output += "</div>";
+    }
+
+    document.getElementById("hasil").innerHTML = output;
+
+    // Distribusi frekuensi
+    distribusiFrekuensi(data.map(d => d.nilai));
+}
+
+function distribusiFrekuensi(nilai) {
+    let min = Math.min(...nilai);
+    let max = Math.max(...nilai);
+
+    let jumlahKelas = 5; // kelas interval
+    let interval = Math.ceil((max - min) / jumlahKelas);
+
+    let tabel = "<table>";
+    tabel += "<tr><th>Kelas Interval</th><th>Frekuensi</th></tr>";
+
+    for (let i = 0; i < jumlahKelas; i++) {
+        let bawah = min + (i * interval);
+        let atas = bawah + interval - 1;
+
+        let frek = nilai.filter(n => n >= bawah && n <= atas).length;
+
+        tabel += `<tr>
+                    <td>${bawah} – ${atas}</td>
+                    <td>${frek}</td>
+                  </tr>`;
+    }
+
+    tabel += "</table>";
+    document.getElementById("frekuensi").innerHTML = tabel;
+}
+</script>
+
+</body>
+</html>
